@@ -1,38 +1,73 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_app/core/models/crew.dart';
+import 'package:firebase_app/core/models/brew.dart';
 import 'package:firebase_app/core/services/auth_service.dart';
 import 'package:firebase_app/core/services/database.dart';
-import 'package:firebase_app/widgets/crewlist.dart';
+import 'package:firebase_app/screens/home/settings_form.dart';
+import 'package:firebase_app/widgets/brewlist.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {
-  final AuthService _auth = AuthService();
-
+  const Home({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<List<Crew>>.value(
-      value: DatabaseService().crews,
+    void _showSettingsPanel() {
+      showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 60.0),
+              child: SettingsForm(),
+            );
+          });
+    }
+
+    final AuthService _auth = AuthService();
+    return StreamProvider<List<Brew>?>.value(
+      //initialData: QuerySnapshot(),
       initialData: [],
-      catchError: (_, __) => [],
+      value: DatabaseService(uid: '').brew,
       child: Scaffold(
         backgroundColor: Colors.brown[50],
         appBar: AppBar(
-          title: Text("Employee Crew"),
+          title: Text('Brew Select'),
           backgroundColor: Colors.brown[400],
           elevation: 0.0,
           actions: [
-            // ignore: deprecated_member_use
-            FlatButton.icon(
-              icon: Icon(Icons.person),
-              label: Text("Logout"),
+            TextButton.icon(
               onPressed: () async {
                 await _auth.signOut();
               },
-            )
+              icon: Icon(
+                Icons.person,
+              ),
+              label: Text('Log out'),
+              // style: ButtonStyle(
+              //     backgroundColor:
+              //         MaterialStateProperty.all<Color>(Colors.white)),
+            ),
+            TextButton.icon(
+              // style: ButtonStyle(
+              //     backgroundColor:
+              //         MaterialStateProperty.all<Color>(Colors.white)),
+              onPressed: () {
+                _showSettingsPanel();
+              },
+              icon: Icon(
+                Icons.settings,
+              ),
+              label: Text('settings'),
+              autofocus: true,
+            ),
           ],
         ),
-        body: CrewList(),
+        body: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/coffee_bg.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: BrewList()),
       ),
     );
   }
